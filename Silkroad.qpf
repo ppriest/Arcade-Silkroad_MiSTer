@@ -1,0 +1,4 @@
+QUARTUS_VERSION = "17.0"
+# Silkroad_stp is the instrumented revision (ISSP probes, OSD debug page); Silkroad the release.
+PROJECT_REVISION = "Silkroad_stp"
+PROJECT_REVISION = "Silkroad"
