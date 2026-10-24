@@ -1,0 +1,40 @@
+MAME 0.289, silkroad.cpp. scripts/write_timing.py: writes by scanline over N frames, MAME's
+screen of 256 lines with vblank at 240-255 (silkroad.cpp:453-454; vblank start 240).
+Runs: attract --skip 600 --frames 1800; play --coin 600 --skip 900 --frames 2400 (coin,
+Start, P1 Right held, Button 1 pulsed; debug/wtiming/snap_play shows gameplay at the end).
+
+Findings:
+- Sprite RAM: written only on lines 240-249 (attract) and 240-243 (play), none in the
+  visible area. 79-85% of writes in the first 2 lines after vblank start.
+- Video registers 0xC0010C-0xC00123: only on lines 240-250 (attract), 240-243 (play).
+- Tile VRAM: written during the visible area. Play: vram0 only on lines 27-75, vram1 on
+  8-82; vram2 across the frame. Attract: all three across the frame.
+- Palette: mostly in vblank (64-94%), the rest across the frame in both runs.
+
+Consequence: MAME draws at vblank start from live RAM, which holds what the game wrote in
+the previous vblank. Latching sprite RAM and the scroll registers once, after line 250 and
+before line 0's prefetch, gives the same pairing per line. Tile VRAM and palette written
+mid-frame show from the next line down on a per-line renderer, and in MAME from the next
+frame: a known difference, checked in Phase 2 against MAME frames.
+
+Per-line last-write detail: the 'hist' rows of debug/wtiming/silkroad*.txt.
+
+silkroad: 256 lines, vblank start 240 (16 lines of vblank), 1800 frames
+  region      /frame  +0..1 vblank +0..23  from vblank start, 8 lines a column
+  spriteram     55.8  85.3% 100.0% 100.0%  |#0                              |
+  palette       26.8   0.4%  94.2%  95.0%  |#0.          ..........         |
+  vram0         16.3   0.4%  47.7%  51.3%  |310  011000...                  |
+  vram1         77.1   0.0%  89.7%  90.2%  |62.000....                      |
+  vram2         30.7   0.0%  69.0%  91.8%  |1520.    .000.                  |
+  vregs          6.0  76.9% 100.0% 100.0%  |#.                              |
+
+
+silkroad_play: 256 lines, vblank start 240 (16 lines of vblank), 2400 frames
+  region      /frame  +0..1 vblank +0..23  from vblank start, 8 lines a column
+  spriteram    139.4  78.6% 100.0% 100.0%  |#                               |
+  palette        3.5   1.5%  63.8%  67.0%  |510000000000                    |
+  vram0          4.4   0.0%   0.0%   0.0%  |     1320000                    |
+  vram1          3.9   0.0%   0.0%   0.0%  |   331000 .0.                   |
+  vram2          6.0   0.3%  70.4%  88.7%  |511.   .000                     |
+  vregs          6.0  30.7% 100.0% 100.0%  |#                               |
+

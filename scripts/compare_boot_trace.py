@@ -112,39 +112,79 @@ def cmd_compare(game):
     rw_ = [(a, m, d) for _, rw, a, m, d in rtl if rw == "w"]
     rc = 0
 
-    # --- writes, strictly in order
+    # --- writes, in order, except that a run of up to REORDER writes may come in another order
+    # when both sides hold the same writes: a CPU core can order the bus cycles of one
+    # instruction differently (TG68K's halves of an exception frame against MAME's 68020),
+    # with the same result in memory. Each accepted run is counted and the first is shown.
+    # The two sides of a run are compared as the bytes they write, so a long written whole on
+    # one side and as two separated halves on the other still pairs up.
+    REORDER = 12
+
+    def bytes_of(ws):
+        out = []
+        for a, m, d in ws:
+            for lane in range(4):
+                if m >> (8 * (3 - lane)) & 0xFF:
+                    out.append((a + lane, d >> (8 * (3 - lane)) & 0xFF))
+        return sorted(out)
+
     n = len(rw_)
-    first = next((i for i in range(min(n, len(mw))) if rw_[i] != mw[i]), None)
-    if first is None and n <= len(mw):
-        print(f"WRITES    {n} of {n} match MAME in address, lanes, data and order")
+    first, reorders, shown, i, j = None, 0, None, 0, 0
+    while i < n and j < len(mw):
+        if rw_[i] == mw[j]:
+            i += 1
+            j += 1
+            continue
+        hit = next(((k, q) for k in range(1, REORDER + 1) for q in range(1, REORDER + 1)
+                    if (k > 1 or q > 1) and i + k <= n and j + q <= len(mw)
+                    and bytes_of(rw_[i:i + k]) == bytes_of(mw[j:j + q])), None)
+        if hit is None:
+            first = i
+            break
+        reorders += 1
+        shown = shown if shown is not None else (i, hit[0])
+        i += hit[0]
+        j += hit[1]
+    if reorders:
+        si, sk = shown
+        print(f"WRITES    {reorders} run(s) of up to {REORDER} writes in another order with the same "
+              f"writes; the first at write {si + 1}, {sk} writes")
+    mfirst = j
+    if first is None and i >= n:
+        print(f"WRITES    {n} of {n} match MAME in address, lanes, data and order"
+              + (" (with the runs above)" if reorders else ""))
     else:
         rc = 1
         if first is None:
             print(f"WRITES    the RTL made {n} writes, MAME only {len(mw)} in its trace")
         else:
-            print(f"WRITES    MISMATCH at write {first + 1} of {n}:")
-            for i in range(max(0, first - 3), min(first + 4, n, len(mw))):
-                flag = "  <--" if i == first else ""
-                a1, m1, d1 = mw[i]
-                a2, m2, d2 = rw_[i]
-                print(f"    #{i + 1:<6} MAME {a1:06X} {m1:08X} {d1:08X}   "
-                      f"RTL {a2:06X} {m2:08X} {d2:08X}{flag}")
+            print(f"WRITES    MISMATCH at RTL write {first + 1} of {n} (MAME write {mfirst + 1}):")
+            for d in range(-3, 4):
+                ri, mi = first + d, mfirst + d
+                if 0 <= ri < n and 0 <= mi < len(mw):
+                    flag = "  <--" if d == 0 else ""
+                    a1, m1, d1 = mw[mi]
+                    a2, m2, d2 = rw_[ri]
+                    print(f"    #{mi + 1:<6} MAME {a1:06X} {m1:08X} {d1:08X}   "
+                          f"#{ri + 1:<6} RTL {a2:06X} {m2:08X} {d2:08X}{flag}")
 
-    # How far into MAME's trace does the RTL's progress reach? Up to the
-    # MAME access that made the RTL's last write.
+    # How far into MAME's trace does the RTL's progress reach? Up to the MAME access that made
+    # the MAME write the RTL's last one pairs with.
     wseen = 0
     mame_cut = len(mame)
     for i, (_, rw, *_rest) in enumerate(mame):
         if rw == "w":
             wseen += 1
-            if wseen == n:
+            if wseen == j:
                 mame_cut = i + 1
                 break
     window = mame[:mame_cut]
 
     # --- non-ROM reads, in order
-    mio = [(a, m, d) for _, rw, a, m, d in window if rw == "r" and not is_rom(a)]
-    rio = [(a, m, d) for _, rw, a, m, d in rtl if rw == "r" and not is_rom(a)]
+    # RAM reads (regions.json "trace" "ram") are not I/O: they have no side effects, and a
+    # CPU core may make reads MAME's does not (TG68K's CLR reads before it writes).
+    mio = [(a, m, d) for _, rw, a, m, d in window if rw == "r" and not is_rom(a) and not is_ram(a)]
+    rio = [(a, m, d) for _, rw, a, m, d in rtl if rw == "r" and not is_rom(a) and not is_ram(a)]
     k = min(len(mio), len(rio))
     bad = next((i for i in range(k) if mio[i] != rio[i]), None)
     if bad is None and len(mio) == len(rio):

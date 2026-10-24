@@ -1,5 +1,98 @@
-set_global_assignment -name VERILOG_FILE rtl/lfsr.v
-set_global_assignment -name SYSTEMVERILOG_FILE rtl/cos.sv
-set_global_assignment -name SYSTEMVERILOG_FILE rtl/mycore.v
+# PLL (Altera PLL megafunction wrapper, rtl/pll.v/rtl/pll/pll_0002.v).
+set_global_assignment -name QIP_FILE rtl/pll.qip
+
+# TG68K.C (68EC020 core, vendored -- see rtl/cpu/tg68k/PROVENANCE.md).
+# Package first, then the two files that depend on it, then the top-level
+# wrapper -- same order sim/*_tb/ compiles them in.
+set_global_assignment -name VHDL_FILE rtl/cpu/tg68k/TG68K_Pack.vhd
+set_global_assignment -name VHDL_FILE rtl/cpu/tg68k/TG68K_ALU.vhd
+set_global_assignment -name VHDL_FILE rtl/cpu/tg68k/TG68KdotC_Kernel.vhd
+set_global_assignment -name VHDL_FILE rtl/cpu/tg68k/TG68K.vhd
+
+# Main CPU bus wrapper around TG68K.C.
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/cpu/maincpu.sv
+
+# CPU <-> video shared RAM and register decode.
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/memory/dpram.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/silkroad_vregs.sv
+
+# Video pipeline: timing, the tilemaps, sprite RAM and the sprite line engine
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/video_timing.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/silkroad_tilemaps.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/silkroad_spriteram.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/silkroad_sprites.sv
+
+# CRT Adjust: crt_vsize (rmonic79/MiSTer-CRT-Adjust) -> crt_adjust
+# (Arcade-Raiden_MiSTer), chained by crt_chain.
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/crt_adjust.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/crt_vsize.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/crt_chain.sv
+
+# HDMI rotation through the HPS framebuffer (Sorgelig, via Arcade-SKNS_MiSTer).
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/screen_rotate_two.sv
+
+# hiscore.v (MAME hiscore.dat support; vendored from JimmyStones/Hiscores_MiSTer).
+set_global_assignment -name VERILOG_FILE rtl/hiscore.v
+
+# CPU + video integration.
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/silkroad_core.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/debug/debug_tracer.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/debug/issp_probe.sv
+
+# Fast ROM loading: DDR3 staging (the .mra DMAs the ROM there) plus the bulk
+# DDR3 -> SDRAM copier.
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/memory/ddram_phy.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/memory/rom_loader.sv
+
+# SDRAM backend: burst-4 controller (vendored/adapted, see
+# rtl/memory/sdram/PROVENANCE.md), req/valid wrapper, arbiters, narrow
+# client bridge, gfx-ROM byte reorder, HPS download bridge, full assembly.
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/memory/sdram_download.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/memory/sdram/sdram.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/memory/sdram_phy.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/memory/sdram_arbiter6.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/memory/sdram_narrow_bridge.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/memory/rom_cache.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/memory/silkroad_sdram_top.sv
+
+# CPU + video + SDRAM integration -- the module Silkroad.sv instantiates.
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/silkroad_top.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/mame_keys.sv
+# jt51 (YM2151), rtl/sound/jt51/PROVENANCE.md
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51_acc.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51_csr_op.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51_eg.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51_exp2lin.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51_exprom.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51_kon.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51_lfo.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51_lin2exp.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51_mmr.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51_mod.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51_noise.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51_noise_lfsr.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51_op.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51_pg.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51_phinc_rom.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51_phrom.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51_pm.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51_reg.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51_reg_ch.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51_sh.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt51/hdl/jt51_timers.v
+# jt6295 (OKI M6295), INTERPOL 0: the jtframe FIR it names is in an unused generate branch
+set_global_assignment -name VERILOG_FILE rtl/sound/jt6295/hdl/jt6295.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt6295/hdl/jt6295_acc.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt6295/hdl/jt6295_adpcm.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt6295/hdl/jt6295_ctrl.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt6295/hdl/jt6295_rom.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt6295/hdl/jt6295_serial.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt6295/hdl/jt6295_sh_rst.v
+set_global_assignment -name VERILOG_FILE rtl/sound/jt6295/hdl/jt6295_timing.v
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/sound/oki_rom_bridge.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/sound/sample_cache.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/sound/silkroad_sound.sv
+
 set_global_assignment -name SDC_FILE Silkroad.sdc
 set_global_assignment -name SYSTEMVERILOG_FILE Silkroad.sv

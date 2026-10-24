@@ -36,6 +36,14 @@ Checks:
   7. <buttons names> are the game's own control names, from the manual or
      another source, not "Button 1". Start, Coin, Pause, Service, Test and "-"
      are exempt. --allow-generic-buttons lets early bring-up through.
+  8. <buttons default> has one entry per <buttons names> entry that is not "-",
+     and Start and Coin get the pad's Start and Select. Main_MiSTer
+     (joymapping.cpp, map_joystick) skips the "-" names and gives the n-th
+     default to the n-th named button, so a list written for three buttons
+     shifts Start, Coin and Pause onto other pad buttons in a one-button game.
+  9. No <buttons names> entry other than "-" appears twice. Define buttons
+     prompts by name and ignores a pad button already taken in the same pass
+     (input.cpp), so a repeated name reads as one prompt refusing the button.
 
 Usage:
     python scripts/validate_mra.py releases/*.mra
@@ -141,8 +149,14 @@ def check(path, rotations, allow_generic_buttons=False, installed=None):
         nbytes = len([x for x in sw.get('default').split(',') if x.strip()])
         bits = []
         for dip in sw.findall('dip'):
-            for b in (dip.get('bits') or '').split(','):
-                if b.strip().isdigit():
+            fields = [b.strip() for b in (dip.get('bits') or '').split(',')]
+            # Main_MiSTer reads "first,last" with sscanf("%d,%d") (mra_loader.cpp): a third
+            # number is ignored and the switch shows half its settings
+            if len(fields) > 2:
+                problems.append('<dip name="%s" bits="%s">: bits is a range "first,last", '
+                                'not a list' % (dip.get('name'), dip.get('bits')))
+            for b in fields:
+                if b.isdigit():
                     bits.append(int(b))
         if bits and max(bits) >= nbytes * 8 + 16:
             problems.append(
@@ -181,6 +195,27 @@ def check(path, rotations, allow_generic_buttons=False, installed=None):
                 'DIP %r with setting %r needs %d columns, the OSD has %d: the value '
                 'wraps off screen. Abbreviate the name or the settings in the '
                 'generator' % (name, widest, cols, OSD_COLS))
+
+    b = root.find('buttons')
+    if b is not None and b.get('default'):
+        named = [n.strip() for n in (b.get('names') or '').split(',') if n.strip() and n.strip() != '-']
+        defs = [d.strip() for d in b.get('default').split(',')]
+        pairs = ', '.join('%s=%s' % p for p in zip(named, defs))
+        if len(defs) != len(named):
+            problems.append(
+                '<buttons default> has %d entries for %d named buttons; Main_MiSTer pairs them '
+                'in order, skipping "-": %s' % (len(defs), len(named), pairs))
+        want = {'start': 'start', 'coin': 'select'}
+        for n, d in zip(named, defs):
+            if n.lower() in want and d.lower() != want[n.lower()]:
+                problems.append('<buttons default> puts %s on the pad\'s %s (pairs: %s)' % (n, d, pairs))
+
+    if b is not None:
+        seen = [n.strip() for n in (b.get('names') or '').split(',') if n.strip() and n.strip() != '-']
+        dup = sorted({n for n in seen if seen.count(n) > 1})
+        if dup:
+            problems.append('<buttons names> repeats %s: Define buttons shows the same prompt twice '
+                            'and refuses the pad button given to the first' % ', '.join(dup))
 
     if not allow_generic_buttons:
         gen = generic_buttons(root)

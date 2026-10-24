@@ -7,6 +7,8 @@
     python scripts/hw.py run   "Game Title (set 1)"      # launch, then shot
     python scripts/hw.py playing                         # what is running
     python scripts/hw.py osd                             # toggle the OSD (forces an nvram save)
+    python scripts/hw.py keys 6 2                        # press and release Linux key codes in turn
+                                                         # (6 = "5" MAME coin, 2 = "1" start, 25 = P pause)
 
 Needs MiSTer Remote (wizzomafizzo/mrext) listening on port 8182, and the same
 ./mister.env that scripts/deploy.py uses. The .mra folder is derived from the
@@ -184,8 +186,8 @@ def resolve_mra(m, name):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("command", choices=("launch", "shot", "run", "playing", "osd"))
-    ap.add_argument("mra", nargs="?", help=".mra name or absolute remote path")
+    ap.add_argument("command", choices=("launch", "shot", "run", "playing", "osd", "keys"))
+    ap.add_argument("mra", nargs="*", help=".mra name or absolute remote path; for keys, the codes")
     ap.add_argument("--out", default=str(REPO / "debug" / "hw" / "shot.png"))
     ap.add_argument("--settle", type=float, default=4)
     ap.add_argument("--native", action="store_true",
@@ -196,6 +198,15 @@ def main():
     a = ap.parse_args()
 
     m = Mister(load_env(REPO, require=("MISTER_HOST", "MISTER_USER", "MISTER_PASSWORD")))
+
+    if a.command == "keys":
+        # the core sees them only while the OSD is closed (hps_io); each is a press and release
+        for code in a.mra:
+            m.post(f"/controls/keyboard-raw/{int(code)}")
+            time.sleep(0.5)
+        print("  keys sent:", " ".join(a.mra))
+        return 0
+    a.mra = a.mra[0] if a.mra else None
 
     if a.command == "playing":
         print(m.get("/games/playing"))

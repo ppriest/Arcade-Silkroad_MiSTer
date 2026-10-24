@@ -57,7 +57,7 @@ Steps for a release:
    shows this build's date and the right MRA count. Files in `unsupported/` and `_dev/` are not
    published, so keep work in progress there.
 
-**Current state:** <one line: what the latest build passes or fails, with the number>.
+**Current state:** `Arcade-Silkroad_20261024.rbf`, `Silkroad` at `1ba171a`, default seed: timing met on every clock (`clk_sdram` +2.341 ns, `clk_sys` +4.068 ns). Smoke-tested on hardware: both sets boot to attract and silkroad plays (`debug/hwrel/`).
 
 ## Submitting the core upstream
 

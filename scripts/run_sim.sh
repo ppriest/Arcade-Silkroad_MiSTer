@@ -79,6 +79,8 @@ fi
 #                           it, ModelSim's vlog does not (vlog-2730), and it
 #                           must stay UNTOUCHED -- so it is left out of
 #                           simulation rather than patched. Still synthesized.
+#   hiscore.v               vendored JimmyStones/Hiscores_MiSTer; uses ram_addr
+#                           before declaring it (vlog-2730), same as above.
 #   *_upstream_reference.*  pristine upstream copies kept beside the vendored
 #                           modules purely so local changes can be diffed.
 #   cos.sv, lfsr.v, mycore.v  Template_MiSTer's demo core. Excluded now, and to
@@ -93,7 +95,7 @@ RTL=$(find rtl -name '*.sv' \
 VLOG=$(find rtl -name '*.v' \
         -not -path 'rtl/synth_check/*' \
         -not -name 'pll*.v' \
-        -not -name 'lfsr.v' -not -name 'mycore.v' \
+        -not -name 'lfsr.v' -not -name 'mycore.v' -not -name 'hiscore.v' \
         -not -name '*_upstream_reference.v' | sort)
 
 echo "--- vlog: RTL + testbench ---"
@@ -110,10 +112,16 @@ echo "--- vlog: RTL + testbench ---"
 #
 # -suppress 7061: some vendored cores (fx68k) drive parts of an array from more than one
 # always_ff. Quartus accepts it; ModelSim refuses by default.
+#
+# No -quiet: ModelSim 10.5b's vlog -quiet exits 127 with no message for some benches here
+# (sdram_tb, compositor_tb, ...) where the same compile without it succeeds. The per-module
+# lines go to work/vlog.log instead; errors and warnings are printed.
 # shellcheck disable=SC2086
-"$MS/vlog.exe" -quiet -sv -work work -suppress 7061 \
+"$MS/vlog.exe" -sv -work work -suppress 7061 \
     +define+SIMULATION ${INITREG-+initreg=r+0 +initmem=r+0} ${VDEFS:-} \
-    $VLOG $RTL $(ls sim/common/*.sv 2>/dev/null) "sim/$TB"/*.sv
+    $VLOG $RTL $(ls sim/common/*.sv 2>/dev/null) "sim/$TB"/*.sv \
+  > work/vlog.log 2>&1 || { grep -v '^-- Compiling' work/vlog.log; exit 1; }
+grep -E '^\*\* (Error|Warning)' work/vlog.log || true
 
 # The bench's top module is found rather than derived from the directory name,
 # so a bench directory can hold more than one file without the runner caring.

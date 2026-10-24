@@ -245,11 +245,16 @@ def parse_ports(body, all_blocks, missing, depth=0):
             last = None
             continue
 
-        # Not emitted as a switch, but its default is part of the byte.
-        m = re.match(rf'PORT_DIPUNUSED(?:_DIPLOC)?\(\s*{_NUM}\s*,\s*{_NUM}',
+        # Not emitted as a switch, but its default is part of the byte. The default may be
+        # IP_ACTIVE_LOW / IP_ACTIVE_HIGH: MAME's PORT_DIPUNUSED expands to
+        # PORT_SPECIAL_ONOFF(mask, default, ...), whose "Off" is mask & default, so
+        # IP_ACTIVE_LOW (all ones) means the bit reads 1 (dreamwld.cpp writes it that way).
+        m = re.match(rf'PORT_DIPUNUSED(?:_DIPLOC)?\(\s*{_NUM}\s*,\s*({_NUM[1:-1]}|IP_ACTIVE_LOW|IP_ACTIVE_HIGH)',
                      line)
         if m:
-            ports[cur].append(("(unused)", _num(m.group(1)), _num(m.group(2)), None))
+            mask, d = _num(m.group(1)), m.group(2)
+            dflt = mask if d == "IP_ACTIVE_LOW" else 0 if d == "IP_ACTIVE_HIGH" else _num(d) & mask
+            ports[cur].append(("(unused)", mask, dflt, None))
             last = None
             continue
 

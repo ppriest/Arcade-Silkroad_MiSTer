@@ -63,14 +63,22 @@ QUARTUS_BIN = None
 # commit that adds the module it names, so the gate grows with the design.
 REQUIRED_INSTANCES = (
     "hps_io",        # the framework's HPS interface; present from the template on
-    # "fx68k", "sdram", "arcade_video", "Hq2x", "screen_rotate_two", ...
+    "TG68KdotC_Kernel:u_cpu",
+    "silkroad_tilemaps:u_tilemaps",
+    "silkroad_spriteram:u_spriteram",
+    "silkroad_sprites:u_sprites",
+    "sdram:mem_ctrl",
+    "rom_loader:u_rom_loader",
+    "hiscore:u_hiscore",
+    "arcade_video:arcade_video",
+    "screen_rotate_two:screen_rotate_two",
 )
 
 # Macros the design needs defined in the .qsf, and what breaks without each.
 # Presence is not connection: a module can stay in the netlist with its ports
 # bound to implicitly declared wires because a VERILOG_MACRO went missing.
 REQUIRED_MACROS = {
-    # "MISTER_FB": "HDMI rotation and 180 flip need the FB_* ports",
+    "MISTER_FB": "HDMI rotation and 180 flip need the FB_* ports",
 }
 
 # Files the compile expects in the project directory that the repo keeps

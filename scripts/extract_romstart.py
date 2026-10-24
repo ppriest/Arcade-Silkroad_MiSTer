@@ -50,6 +50,7 @@ KINDS = {
     "ROM_LOAD16_WORD": "load",         # bytes as they are in the file
     "ROM_LOAD32_BYTE": "load32_byte",
     "ROM_LOAD32_WORD": "load32_word",
+    "ROM_LOAD32_WORD_SWAP": "load32_wswap",
     # ROM_COPY("src", srcofs, dstofs, len) takes bytes from ANOTHER region
     # rather than from a file, so it carries no CRC.
     "ROM_COPY": "copy",

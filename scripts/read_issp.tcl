@@ -21,6 +21,25 @@ set fields_F {
     {frames           0  15 dec}
     {pll_locked     127 127 bit}
 }
+# maincpu.sv: the 68020's last fetch and the boot's progress
+set fields_C {
+    {fetch_addr       0  23 hex}
+    {iacks           24  39 dec}
+    {palette_writes  40  55 dec}
+    {rom_reads       56  71 dec}
+    {reset           72  72 bit}
+    {pause           73  73 bit}
+    {irq_pending     74  74 bit}
+    {vram_writes     75  90 dec}
+}
+# silkroad_core.sv: the video engines' render counters (a line is 3072 clk)
+set fields_V {
+    {tm_render_max    0  11 dec}
+    {sp_render_max   12  23 dec}
+    {tm_lines_cut    24  43 dec}
+    {sp_lines_cut    44  63 dec}
+    {frames          64  83 dec}
+}
 # ---------------------------------------------------------------------------
 
 proc bits_to_int {s lo hi} {
@@ -86,6 +105,8 @@ if {$want ne ""} {
 # than guesses.
 switch -- $inst_id {
     F       { set fields $fields_F }
+    C       { set fields $fields_C }
+    V       { set fields $fields_V }
     default {
         puts "instance id '$inst_id' has no field table -- add one before reading it"
         exit 1

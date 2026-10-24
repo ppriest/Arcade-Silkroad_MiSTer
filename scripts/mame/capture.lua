@@ -9,6 +9,12 @@
 --   CORE_BIG     1 if the bus is big-endian
 --   CORE_READ    "name:hexlo:hexhi,..."  RAM readable through the CPU's view
 --   CORE_WTAP    "name:hexlo:hexhi,..."  write-only registers, rebuilt from writes
+--   CORE_PREV    "name:hexlo:hexhi,..."  RAM read at the frame BEFORE the capture: a copy the
+--                                         driver takes at vblank (screen_vblank runs right
+--                                         after this notifier in the same vblank_begin, with no
+--                                         CPU time between) holds exactly this at the capture
+--   CORE_COIN    frame to insert a coin, press Start and play (0 = attract), as wtiming.lua;
+--                CORE_IN_COIN/START/HOLD/PULSE name the fields (regions.json "inputs")
 --
 -- Readable RAM is read through the CPU's address space: that is what the CPU
 -- would read, handlers and umask included, which is what the RTL must match.
@@ -99,11 +105,35 @@ local function dump_sparse(name, tbl, size)
     wr(name, table.concat(t))
 end
 
+local COIN = tonumber(os.getenv("CORE_COIN") or "0")
+local function field(name)
+    for _, port in pairs(m.ioport.ports) do
+        if port.fields[name] then return port.fields[name] end
+    end
+end
+local f_coin, f_start = field(os.getenv("CORE_IN_COIN") or "Coin 1"), field(os.getenv("CORE_IN_START") or "1 Player Start")
+local f_hold, f_pulse = field(os.getenv("CORE_IN_HOLD") or "P1 Right"), field(os.getenv("CORE_IN_PULSE") or "P1 Button 1")
+assert(COIN == 0 or (f_coin and f_start), "coin or start field not found")
+
 local done = false
 core_subs[#core_subs + 1] = emu.add_machine_frame_notifier(guard("frame", function()
     if done then return end
     local scr = m.screens[":screen"]
-    if scr:frame_number() < FRAME then return end
+    local n = scr:frame_number()
+    if COIN > 0 then
+        f_coin:set_value((n >= COIN and n < COIN + 6) and 1 or 0)
+        f_start:set_value((n >= COIN + 90 and n < COIN + 96) and 1 or 0)
+        if n >= COIN + 96 then
+            if f_hold then f_hold:set_value(1) end
+            if f_pulse then f_pulse:set_value((n % 20) < 4 and 1 or 0) end
+        end
+    end
+    if n == FRAME - 1 then
+        for _, r in ipairs(ranges(os.getenv("CORE_PREV"))) do
+            wr(r.name .. ".bin", read_block(r.lo, r.hi))
+        end
+    end
+    if n < FRAME then return end
     done = true
 
     for _, r in ipairs(ranges(os.getenv("CORE_READ"))) do
@@ -120,6 +150,7 @@ core_subs[#core_subs + 1] = emu.add_machine_frame_notifier(guard("frame", functi
     f:write("mame ", emu.app_version(), "\n")
     f:write("frame ", tostring(scr:frame_number()), "\n")
     f:write("screen ", tostring(scr.width), "x", tostring(scr.height), "\n")
+    f:write("coin ", tostring(COIN), "\n")
     f:close()
 
     print("CORE_CAPTURE_OK " .. OUT)

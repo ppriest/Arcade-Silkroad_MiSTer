@@ -1,4 +1,10 @@
 `timescale 1ns/10ps
+// From the 50 MHz reference (docs/ROADMAP.md, Clocks):
+//   outclk_0  clk_sys, 48 MHz: 6 x the 8 MHz pixel clock (ce_pix 1 in 6), 3 x the 68EC020's 16 MHz.
+//   outclk_1  clk_sdram, 96 MHz, in phase with clk_sys: the SDRAM controller (sdram.sv).
+//   outclk_2  SDRAM_CLK, 96 MHz, 7292 ps behind clk_sdram (252 degrees), so 3125 ps ahead:
+//             the lead the 48 MHz builds ran with (306 degrees there), itself carried from
+//             DreamWorld's 54 MHz build and not swept. docs/HACKS.md.
 module  pll_0002(
 
 	// interface 'refclk'
@@ -10,6 +16,12 @@ module  pll_0002(
 	// interface 'outclk0'
 	output wire outclk_0,
 
+	// interface 'outclk1'
+	output wire outclk_1,
+
+	// interface 'outclk2'
+	output wire outclk_2,
+
 	// interface 'locked'
 	output wire locked
 );
@@ -18,15 +30,15 @@ module  pll_0002(
 		.fractional_vco_multiplier("false"),
 		.reference_clock_frequency("50.0 MHz"),
 		.operation_mode("direct"),
-		.number_of_clocks(1),
-		.output_clock_frequency0("20.000000 MHz"),
+		.number_of_clocks(3),
+		.output_clock_frequency0("48.0 MHz"),
 		.phase_shift0("0 ps"),
 		.duty_cycle0(50),
-		.output_clock_frequency1("0 MHz"),
+		.output_clock_frequency1("96.0 MHz"),
 		.phase_shift1("0 ps"),
 		.duty_cycle1(50),
-		.output_clock_frequency2("0 MHz"),
-		.phase_shift2("0 ps"),
+		.output_clock_frequency2("96.0 MHz"),
+		.phase_shift2("7292 ps"),
 		.duty_cycle2(50),
 		.output_clock_frequency3("0 MHz"),
 		.phase_shift3("0 ps"),
@@ -77,7 +89,7 @@ module  pll_0002(
 		.pll_subtype("General")
 	) altera_pll_i (
 		.rst	(rst),
-		.outclk	({outclk_0}),
+		.outclk	({outclk_2, outclk_1, outclk_0}),
 		.locked	(locked),
 		.fboutclk	( ),
 		.fbclk	(1'b0),
