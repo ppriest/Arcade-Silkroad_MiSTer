@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-3.0-or-later
 -- Sprites with attribute bit 13 set (silkroad.cpp:210, "another priority bit?") and every write
 -- to video registers 3 and 4 (0xC00118-0xC0011F, silkroad.cpp:329; unused by MAME's
 -- screen_update). Driven by scripts/bit13_scan.py through run.lua.

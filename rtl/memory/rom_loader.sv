@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 // Fast ROM loading: bulk copy from DDR3 into the SDRAM ROM map.
 //
 // The slow path streams the ROM through hps_io's ioctl interface a byte at a

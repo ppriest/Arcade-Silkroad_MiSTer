@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Convert an assembled m68k binary (vasm -Fbin output) into VHDL mem_v
 initialization lines for tb_tg68k_boot.vhd, prefixed with a reset vector
 (SSP/PC). Avoids hand-transcribing opcodes into VHDL -- the whole point of

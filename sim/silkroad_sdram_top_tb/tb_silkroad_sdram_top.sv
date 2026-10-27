@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 `timescale 1ns/1ps
 // Integration test for rtl/memory/silkroad_sdram_top.sv: every sub-piece (sdram.sv,
 // sdram_phy.sv, sdram_arbiter6.sv, sdram_narrow_bridge.sv, sdram_download.sv) has its own bench;
@@ -72,8 +74,7 @@ module tb_silkroad_sdram_top;
 	int errors = 0;
 
 	// Pulse ioctl_wr for one cycle, then wait for ioctl_wait to drop --
-	// matches sim/ddram_download_tb/tb_ddram_download.sv's already-proven
-	// send_byte task exactly, including the do/while (not while/do): a
+	// with do/while (not while/do): a
 	// plain `while (ioctl_wait) @(posedge clk);` checks ioctl_wait
 	// immediately after clearing ioctl_wr, in the same active-region delta
 	// as the DUT's own always_ff updating dstate for that same edge --
@@ -204,9 +205,9 @@ module tb_silkroad_sdram_top;
 		while (!cpu_rom_valid) @(posedge clk);
 		// Big-endian: byte0 (lower address) is the word's HIGH byte --
 		// maincpu's real 68020 program ROM convention, NOT
-		// sdram_narrow_bridge.sv's own little-endian packing (correct for
-		// spritelut's ROM_REGION16_LE content, wrong for maincpu's plain
-		// ROM_REGION content) -- see silkroad_sdram_top.sv's u_cpu_bridge
+		// sdram_narrow_bridge.sv's own little-endian packing (correct for a
+		// little-endian 16-bit region, wrong for maincpu's plain ROM_REGION
+		// content) -- see silkroad_sdram_top.sv's u_cpu_bridge
 		// comment for the real bug this was found fixing.
 		check16(cpu_rom_data, 16'hCCDD, "cpu_rom_data");
 		cpu_rom_req = 0;

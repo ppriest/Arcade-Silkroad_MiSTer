@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Inputs for sim/frame_tb from a scripts/mame_capture.py directory.
 
     python sim/frame_tb/prep.py debug/silkroad-sw600

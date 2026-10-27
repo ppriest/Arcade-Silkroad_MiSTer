@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 // Reusable on-hardware trace buffer for bring-up, read out through the video
 // output and controlled live from the OSD.
 //
@@ -35,7 +37,7 @@
 // `rd_data` is registered (a real BRAM read port), so it lags one cycle;
 // irrelevant at line rate.
 //
-// Window: `ctl_window` skips ctl_window*DEPTH events before recording, so the
+// Window: `ctl_window` skips ctl_window*8191 events before recording, so the
 // capture window can be walked across a long boot sequence FROM THE OSD with
 // no rebuild. That is the main reason this module is worth having.
 //
@@ -117,12 +119,12 @@ module debug_tracer #(
 	// any event stream whose period divides it, making every window setting
 	// produce a byte-identical capture -- indistinguishable from a genuine
 	// periodic fault. An odd step cannot alias with a power-of-two period.
-	// 8191 also makes the range useful: window 15 skips ~123k events,
-	// enough to walk past the boot ROM checksum (~96k long reads).
+	// 8191 also makes the range useful: window 15 skips ~123k events, enough
+	// to walk across the boot.
 	wire [19:0] skip_target = ({16'd0, ctl_window} << 13) - {16'd0, ctl_window};
 
 	// Ring mode: count clk cycles since the last event; saturate at the top.
-	// IDLE_BITS=22 is ~49 ms at 85.9 MHz -- comfortably longer than a frame, so
+	// IDLE_BITS=22 is ~87 ms at 48 MHz -- comfortably longer than a frame, so
 	// a legitimate lull across a vblank boundary cannot trip it, while a CPU
 	// that has genuinely stopped fetching does.
 	logic [IDLE_BITS-1:0] idle_cnt = '0;

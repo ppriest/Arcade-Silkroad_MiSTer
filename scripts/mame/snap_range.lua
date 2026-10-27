@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-3.0-or-later
 -- Snapshot every frame in [CORE_FROM, CORE_TO] to CORE_OUT/fNNNNN.png, then exit. Driven by
 -- scripts/hw_vs_mame.py through run.lua. The snapshot is MAME's rendering of the screen, as
 -- mame_capture.py's reference.png (a ROT90/ROT270 set comes out turned 180 degrees).

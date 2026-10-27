@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Run sim/frame_tb on several captures and summarise the comparison with the model.
 
-    python sim/frame_tb/run_scenes.py debug/dreamwld-sw600 debug/baryon-sw3600p ...
+    python sim/frame_tb/run_scenes.py debug/silkroad-sw600 debug/silkroada-sw600 ...
     python sim/frame_tb/run_scenes.py --default        # the scene list below
 
 One ModelSim run per capture (scripts/run_sim.sh, so one at a time), then

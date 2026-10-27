@@ -1,7 +1,9 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 // The complete SDRAM backend: one SDRAM chip (rtl/memory/sdram/sdram.sv), its 3 physical ports
 // wrapped in req/valid (rtl/memory/sdram_phy.sv). Port 0 is the tilemaps', Port 1 the sprites',
 // one client each; Port 2 is shared by the OKI sample caches, the main CPU and the ROM download
-// (rtl/memory/sdram_arbiter6.sv), the CPU through rtl/memory/sdram_narrow_bridge.sv, the download
+// (rtl/memory/sdram_arbiter6.sv), the CPU through rtl/memory/rom_cache.sv, the download
 // through rtl/memory/sdram_download.sv. This module adds each region's base to the clients'
 // offsets; the *_BASE localparams are the layout scripts/build_mra.py builds the .mra from.
 //
@@ -171,7 +173,7 @@ module silkroad_sdram_top (
 		.busy(g1_busy), .valid(sp_gfx_valid), .rdata(sp_gfx_data)
 	);
 
-	// ---- Port 2: arbiter (spritelut, maincpu, download) ----
+	// ---- Port 2: arbiter (both OKI caches, maincpu, download) ----
 	logic         p2phy_req, p2phy_we, p2phy_busy, p2phy_valid;
 	logic [24:0] p2phy_addr;
 	logic [15:0] p2phy_wdata;

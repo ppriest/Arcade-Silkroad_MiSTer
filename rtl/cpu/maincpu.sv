@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 // Main CPU: 68EC020 at 16 MHz (silkroad.cpp:445). Drives the vendored TG68KdotC_Kernel
 // directly (rtl/cpu/tg68k/, PROVENANCE.md; every kernel signal needs an explicit zero
 // initializer, github.com/TobiFlex/TG68K.C/issues/21), plus address decode, BRAM-region
@@ -12,9 +14,8 @@
 // word cycles. The I/O handlers are bytes (324-328), each on its own byte lane; the game
 // uses byte accesses there (docs/boot_trace_mame.txt).
 //
-// sim/maincpu_tb/tb_maincpu.sv (from the Psikyo core) checks ROM req/valid, the BRAM
-// regions, the input-port read and the vblank IRQ; sim/boot_tb runs silkroad's own boot
-// against MAME's bus trace.
+// sim/maincpu_tb/tb_tg68k_isolate.sv runs the vendored kernel alone; sim/boot_tb runs
+// silkroad's own boot against MAME's bus trace.
 //
 // IPL: the kernel inverts its IPL input (`IPL_nr <= NOT IPL`), so level 4 is
 // requested by driving 3'b011, not 3'b100.
@@ -242,17 +243,15 @@ module maincpu (
 
 	// ROM req is a ONE-CYCLE PULSE, not a held level.
 	//
-	// rtl/memory/sdram_narrow_bridge.sv latches the request in B_IDLE
-	// (`if (req) begin word_sel <= addr[2:1]; bstate <= B_WAIT; end`) and
-	// returns to B_IDLE once g_valid arrives. If req is still asserted then,
-	// it immediately re-enters B_WAIT and issues ANOTHER granule read, and
-	// keeps doing so until req drops -- burning SDRAM bandwidth and making
-	// cpu_rom_valid pulse repeatedly for a single CPU access.
+	// rtl/memory/rom_cache.sv takes the request in its idle state and returns
+	// to idle once the access is answered. If req is still asserted then, it
+	// immediately starts ANOTHER access, and keeps doing so until req drops --
+	// burning SDRAM bandwidth and making cpu_rom_valid pulse repeatedly for a
+	// single CPU access.
 	//
-	// The bridge's own state machine is the authority on the req shape,
-	// and it wants a PULSE -- not held-until-acknowledged (sdram_arbiter5.sv
-	// documents a different contract for its own port; it does not apply
-	// here).
+	// The cache's own state machine is the authority on the req shape, and it
+	// wants a PULSE -- not held-until-acknowledged (sdram_arbiter6.sv documents
+	// a different contract for its own port; it does not apply here).
 	logic rom_req_sent;
 	assign rom_req = mem_needed && !is_write && is_rom && !acc_ready && !rom_req_sent;
 

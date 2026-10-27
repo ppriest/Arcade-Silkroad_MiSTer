@@ -1,9 +1,10 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 // Behavioral stand-in for the real DDRAM_* physical interface, used only in
 // simulation. Deliberately configurable read latency and post-accept busy
 // duration so ddram_phy_tb can run against two independently-parameterized
-// instances (see sprite_render_engine_tb's "independently-latencied ROM
-// models" precedent) to rule out timing-dependent bugs rather than proving
-// correctness against only one arbitrary latency value.
+// instances, ruling out timing-dependent bugs rather than proving correctness
+// against only one arbitrary latency value.
 
 module ddram_model #(
 	parameter int READ_LATENCY = 6,   // cycles from RD accept to the DOUT_READY pulse

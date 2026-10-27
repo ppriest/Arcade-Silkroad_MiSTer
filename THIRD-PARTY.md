@@ -64,14 +64,15 @@ direct.
 
 ### MiSTer-devel/Template_MiSTer — GPL-2.0-or-later (`sys/`)
 
-The framework, unmodified. Its grant is "or later", which is what lets it combine with GPL-3 code.
+The framework, unmodified, pinned at `5dda373` (57 files, byte-identical to upstream). Its grant
+is "or later", which is what lets it combine with GPL-3 code.
 
 ## Reference material, not code
 
-MAME (<https://github.com/mamedev/mame>, `src/mame/misc/dreamwld.cpp` and the devices it uses,
+MAME (<https://github.com/mamedev/mame>, `src/mame/unico/silkroad.cpp` and the devices it uses,
 BSD-3-Clause and GPL-2.0-or-later per file) is the reference for the hardware's behaviour; no MAME
-source is compiled into the core. `scripts/oki_model.py` transcribes `okim6295.cpp` and
-`okiadpcm.cpp` for the sound benches; `rtl/mame_keys.sv` takes MAME's default key list.
+source is compiled into the core. `scripts/snd_trace.py` drives MAME's own `okim6295` and
+`ym2151` for the sound benches; `rtl/mame_keys.sv` takes MAME's default key list.
 
 ## Release checklist
 

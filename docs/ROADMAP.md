@@ -193,7 +193,7 @@ None: one image, one configuration. The `.mra` files differ only in ROM file nam
 | whole tree | Fork | Arcade-DreamWorld_MiSTer `233d1f2`: framework glue, SDRAM backend, DDR3 load, hiscore, CRT Adjust, rotation, OSD (GPL-3.0-or-later) |
 | 68EC020 | Keep | TG68K.C in DreamWorld `rtl/cpu/tg68k/` (Psikyo's vendoring, `PROVENANCE.md`), LGPL-3.0 |
 | main bus | Adapt | DreamWorld `rtl/cpu/maincpu.sv`: new decode, MCU removed |
-| YM2151 + 2 x M6295 | Port | Arcade-Vamphalf_MiSTer `rtl/sound/vh_ymoki.sv` (its `aoh` path: YM2151 3.579545 MHz, second OKI banked) with `jt51` (jtcores `985a573`) and `jt6295` (`7d76b0b`), GPL-3.0; `sample_cache.sv` / `oki_rom_bridge.sv` from DreamWorld |
+| YM2151 + 2 x M6295 | Write | `rtl/sound/silkroad_sound.sv`: YM2151 3.579545 MHz, OKI 1 at 1 MHz banked, OKI 2 at 2 MHz, with `jt51` (jtcores `985a573`) and `jt6295` (`7d76b0b`), GPL-3.0; `sample_cache.sv` / `oki_rom_bridge.sv` from DreamWorld |
 | tilemaps | Adapt | DreamWorld `tilemap_line_engine.sv`: three layers, 6 bpp, 12-byte rows |
 | sprites | Adapt | DreamWorld `sprite_line_list.sv` / `sprite_line_engine.sv`: strip format, first-wins line buffer, priority bit |
 | compositor | Adapt | DreamWorld `compositor.sv`: four inputs, sprite priority against layers 1 and 2, 4096-entry palette |
@@ -391,7 +391,7 @@ launched 02:27:57. Evidence in `debug/hw/p2/`; frame matches by `scripts/hw_vs_m
 
 **Phase 4 — Sound.**
 
-`vh_ymoki.sv`'s `aoh` path re-clocked to 48 MHz: YM2151 3.579545 MHz, OKI 1 at 1 MHz banked from
+`rtl/sound/silkroad_sound.sv` at 48 MHz: YM2151 3.579545 MHz, OKI 1 at 1 MHz banked from
 0xC00034, OKI 2 at 2 MHz, MAME's mix (1.0 / 0.45). Exit: register-write traces captured from MAME
 reproduce the audio in a bench against MAME's output, and it is judged by ear on the board.
 

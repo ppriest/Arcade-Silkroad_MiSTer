@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Find the MAME frame each hardware screenshot shows, and diff it.
 
-    python scripts/hw_vs_mame.py dreamwld debug/hw/p2/s*.png --from 300 --to 7200
+    python scripts/hw_vs_mame.py silkroad debug/hw/p2/s*.png --from 300 --to 7200
 
 The hardware boots at its own pace (the MCU handshake, the ROM load), so a screenshot's time
 does not name a MAME frame. MAME's frames FROM..TO are dumped once (debug/<set>-frames/,

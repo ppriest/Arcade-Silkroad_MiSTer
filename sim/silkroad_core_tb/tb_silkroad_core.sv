@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 `timescale 1ns/1ps
 // Real functional test for rtl/silkroad_core.sv: a genuine CPU program
 // (test_video.s, assembled with vasm -- sim/silkroad_core_tb/test_video.hex)
@@ -59,8 +61,8 @@ module tb_silkroad_core;
 	assign tm_gfx_data = 64'h0;
 	assign sp_gfx_data = 64'h0;
 
-	// ---- CPU ROM model: 5-cycle req/valid latency, same style
-	// sim/maincpu_tb/tb_maincpu.sv already used to verify maincpu.sv. ----
+	// ---- CPU ROM model: 5-cycle req/valid latency, the style the maincpu
+	// bench used to verify maincpu.sv. ----
 	localparam int ROM_LATENCY = 5;
 	logic [15:0] rom [0:524287];
 	logic         rom_busy;
@@ -98,7 +100,7 @@ module tb_silkroad_core;
 		for (int i = 0; i < 524288; i++) rom[i] = 16'h0000;
 
 		// Reset vectors: SP=0x00FFFFFC (top of work RAM), PC=0x8 (start),
-		// same convention as sim/maincpu_tb/tb_maincpu.sv.
+		// same convention as the maincpu bench.
 		rom[0] = 16'h00FF; rom[1] = 16'hFFFC;
 		rom[2] = 16'h0000; rom[3] = 16'h0008;
 

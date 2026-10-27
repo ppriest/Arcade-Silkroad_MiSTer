@@ -1,8 +1,7 @@
 # Silkroad state inventory
 
-What a savestate or a state dump has to carry, kept current as RTL lands (the skill's
-`savestates.md`). "Skip" needs a reason: a ROM table from the `.mra`, or something re-derived
-every frame.
+What a savestate or a state dump has to carry, kept current as RTL lands. "Skip" needs a
+reason: a ROM table from the `.mra`, or something re-derived every frame.
 
 ## RAMs
 

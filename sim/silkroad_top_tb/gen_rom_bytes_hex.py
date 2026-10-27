@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
 # Converts test_video.bin (vasm -Fbin output, from sim/silkroad_core_tb/
 # test_video.s) into a $readmemh-compatible hex file, one BYTE per line --
 # unlike sim/silkroad_core_tb/gen_rom_hex.py's word-packed format, this

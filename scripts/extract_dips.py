@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Extract a game's DIP switches from the MAME driver's INPUT_PORTS_START blocks.
 
     python scripts/extract_dips.py <set>
@@ -248,7 +249,7 @@ def parse_ports(body, all_blocks, missing, depth=0):
         # Not emitted as a switch, but its default is part of the byte. The default may be
         # IP_ACTIVE_LOW / IP_ACTIVE_HIGH: MAME's PORT_DIPUNUSED expands to
         # PORT_SPECIAL_ONOFF(mask, default, ...), whose "Off" is mask & default, so
-        # IP_ACTIVE_LOW (all ones) means the bit reads 1 (dreamwld.cpp writes it that way).
+        # IP_ACTIVE_LOW (all ones) means the bit reads 1.
         m = re.match(rf'PORT_DIPUNUSED(?:_DIPLOC)?\(\s*{_NUM}\s*,\s*({_NUM[1:-1]}|IP_ACTIVE_LOW|IP_ACTIVE_HIGH)',
                      line)
         if m:

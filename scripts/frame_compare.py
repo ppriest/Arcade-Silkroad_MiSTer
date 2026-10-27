@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Compare sim/frame_tb's recorded frames with scripts/render_model.py's frame.
 
     python scripts/frame_compare.py debug/silkroad-sw600            # every recorded frame

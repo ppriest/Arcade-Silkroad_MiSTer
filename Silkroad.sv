@@ -107,7 +107,7 @@ localparam CONF_STR = {
 	// The joystick bits: buttons at 4-9, Start 10, Coin 11, Pause 12, Service 13. The .mra's
 	// <buttons> list assigns them and pads the unused button slots with "-" so these stay put
 	// (scripts/build_mra.py); this line only has to agree with it.
-	"J1,Button 1,Button 2,Button 3,-,-,-,Start,Coin,Pause,Service;",
+	"J1,Attack,Jump,Select Magic,-,-,-,Start,Coin,Pause,Service;",
 	"V,v",`BUILD_DATE
 };
 
@@ -134,7 +134,7 @@ wire  [7:0] ioctl_dout;
 wire         ioctl_wait;
 
 // NOTE: hps_io stays in BYTE mode (no WIDE). WIDE(1) would halve the
-// HPS-side transfers, but sys/hiscore.v parses the ioctl stream a byte at
+// HPS-side transfers, but rtl/hiscore.v parses the ioctl stream a byte at
 // a time (field positions from ioctl_addr[2:0], byte-cascaded registers)
 // and returns 8-bit upload data, so it cannot run on a 16-bit ioctl.
 // ROM loading is sped up on the SDRAM side instead -- sdram_download
@@ -303,7 +303,7 @@ wire        flip_screen = status[49] ^ dip_sw[16];
 // WITHOUT a rebuild -- that is the whole point of the module. status[55] is a
 // plain level whose CHANGE re-arms, so toggling it between A and B retriggers
 // capture without resetting the core and disturbing CPU state.
-// Bits placed in status[63:56] -- CFG byte 7 -- per docs/mister_framework_notes.md.
+// Bits placed in status[63:56] -- CFG byte 7 -- per the framework's OSD docs.
 // Two constraints, both learned the hard way:
 //   * The official docs state the classic O/o option syntax addresses bits
 //     0-63 ONLY (O = upper 32, o = lower 32, i.e. +32). Bits placed at 64-71
@@ -329,7 +329,7 @@ wire [3:0] dbg_render_dis = status[43:40];
 // The bit comes from the .mra's <buttons> element, NOT from CONF_STR's J1 list
 // -- when an .mra declares buttons, that mapping governs:
 //
-//   names="Button 1,Button 2,Button 3,-,-,-,Start,Coin,Pause"
+//   names="Attack,Jump,Select Magic,-,-,-,Start,Coin,Pause,Service"
 //
 // Names map to joystick bits from bit 4, so the three "-" placeholders pad
 // positions 3-5 and put Start at 10, Coin at 11 (which is exactly what the

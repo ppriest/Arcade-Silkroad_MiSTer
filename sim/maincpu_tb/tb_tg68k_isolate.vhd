@@ -1,3 +1,5 @@
+-- SPDX-License-Identifier: GPL-3.0-or-later
+--
 -------------------------------------------------------------------------------
 -- Pure-VHDL counterpart to tb_tg68k_isolate.sv, built to directly test
 -- whether ModelSim's mixed-language SV-instantiates-VHDL boundary is the

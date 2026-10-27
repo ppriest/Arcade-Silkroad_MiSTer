@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
 # Converts test_video.bin (vasm -Fbin output) into a $readmemh-compatible
-# hex file, one 16-bit word per line -- same conversion
-# sim/maincpu_tb/gen_rom_hex.py already does for that testbench.
+# hex file, one 16-bit word per line.
 with open("sim/silkroad_core_tb/test_video.bin", "rb") as f:
     data = f.read()
 

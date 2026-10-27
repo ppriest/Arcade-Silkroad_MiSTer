@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 // In-System Sources and Probes instrumentation for the SDRAM path.
 //
 // WHY THIS RATHER THAN SIGNALTAP

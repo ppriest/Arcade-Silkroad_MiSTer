@@ -1,26 +1,24 @@
-// Bridges a narrow (byte- or word-wide) req/valid read port onto a
-// 64-bit-granule sdram_arbiter5/sdram_phy consumer port. Exists because
-// sdram.sv's burst-4 controller only ever hands back a full 8-byte-aligned
-// granule (rtl/memory/sdram/sdram.sv, rtl/memory/sdram_arbiter5.sv) -- every
-// Port 2 consumer narrower than that (sprite spritelut's 16-bit words,
-// maincpu's 16-bit program fetch, audiocpu's 8-bit program fetch, per
-// docs/phase1_sdram_map.md) needs the same "fetch the containing granule,
-// then pick out the wanted slice" logic, so it's built once here rather
-// than copy-pasted per consumer.
+// SPDX-License-Identifier: GPL-3.0-or-later
 //
-// GRANULE CACHE: the bridge
-// keeps the last fetched granule and serves any request that falls inside
-// it WITHOUT a new SDRAM transaction -- a 1-cycle B_HIT response instead
-// of a full arbiter+controller round trip. The narrow consumers' access
-// patterns are dominated by sequential streams (68020 opcode fetch: 4
-// words/granule; Z80 opcode fetch: 8 bytes/granule; spritelut: runs of
-// consecutive tile codes), so this removes the majority of their Port 2
-// traffic -- which otherwise contends with sprite gfx fetches and was a
-// prime suspect in the rendering slowdown (docs/ROADMAP.md, "Fix the
-// slowdown"). All cached regions are ROM (written only by the HPS
-// download), so the only invalidation needed is the `inval` input, tied
-// to ioctl_download by silkroad_sdram_top -- the cache is flushed
-// continuously for the whole download and starts cold afterwards.
+// Bridges a narrow (byte- or word-wide) req/valid read port onto a
+// 64-bit-granule sdram_arbiter6/sdram_phy consumer port. sdram.sv's burst-4
+// controller only ever hands back a full 8-byte-aligned granule, so a client
+// narrower than that needs the same "fetch the containing granule, then pick
+// out the wanted slice" logic; it is built once here rather than copy-pasted
+// per client.
+//
+// Not instantiated in the core: rom_cache.sv took its place for the 68020's
+// program fetches (same ports, WORD_BYTES = 2, plus a cache of whole lines).
+// Kept because sim/sdram_narrow_bridge_tb verifies it.
+//
+// GRANULE CACHE: the bridge keeps the last fetched granule and serves any
+// request that falls inside it WITHOUT a new SDRAM transaction -- a 1-cycle
+// B_HIT response instead of a full arbiter+controller round trip. Sequential
+// streams (four words per granule for a 68020 opcode fetch, eight bytes for a
+// byte-wide client) then cost one Port 2 transaction per granule instead of
+// one per access. All cached regions are ROM (written only by the download),
+// so the only invalidation needed is the `inval` input, tied to
+// ioctl_download by the caller.
 //
 // Byte/word layout within a fetched granule, derived directly from
 // sdram.sv's own read-capture logic and sdram_chip_model.sv's write-mask
@@ -38,11 +36,10 @@
 // -- a held req would re-trigger this bridge) and hold `addr` stable until
 // the valid pulse. Toward the arbiter this bridge holds g_req until
 // g_valid, one request at a time (no pipelining -- matches
-// sdram_arbiter5's own single-outstanding-transaction design).
+// sdram_arbiter6's own single-outstanding-transaction design).
 
 module sdram_narrow_bridge #(
-	parameter int WORD_BYTES = 2   // 1 = byte-wide client (e.g. Z80/audiocpu),
-									 // 2 = word-wide client (e.g. spritelut, maincpu)
+	parameter int WORD_BYTES = 2   // 1 = byte-wide client, 2 = word-wide client
 ) (
 	input  logic clk,
 	input  logic reset,
@@ -57,7 +54,7 @@ module sdram_narrow_bridge #(
 	output logic                     valid,
 	output logic [8*WORD_BYTES-1:0] data,
 
-	// wide granule side (one sdram_arbiter5 consumer port)
+	// wide granule side (one sdram_arbiter6 consumer port)
 	output logic         g_req,
 	output logic [24:0] g_addr,
 	input  logic         g_valid,

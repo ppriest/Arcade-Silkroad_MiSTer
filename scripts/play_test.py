@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Boot, coin up and start each set on the MiSTer; check Pause; one contact sheet.
 
     python scripts/play_test.py                        # every set in releases/ (else releases/_dev)
-    python scripts/play_test.py "Dream World" "Cute Fighter"
+    python scripts/play_test.py "The Legend of Silkroad"
 
 Per set: launch (scripts/hw.py run), a native frame of the attract (~25 s in), coin (key 5)
 and Start (key 1) through the remote API, a native frame in play, then Pause (key P): two

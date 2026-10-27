@@ -12,8 +12,8 @@ Targets the physical MiSTer SDRAM add-on board: an `MT48LC16M16` SDR SDRAM chip 
 2 banks × 13-bit row × 9-bit column, 24-bit total word address = 32MB), reached via the DE10-nano's
 `SDRAM_*` pins (`sys/emu_ports.vh`). 3 independent client ports, internally prioritized
 port0→port1→port2 when idle, fixed low latency (no HPS/ARM-side contention, unlike `DDRAM_*`) —
-see `docs/phase1_sdram_map.md` for why this project uses `SDRAM_*` rather than `DDRAM_*` for
-real-time gfx/CPU ROM streaming.
+which is why this project uses `SDRAM_*` rather than `DDRAM_*` for real-time gfx/CPU ROM
+streaming.
 
 ## Why this isn't used verbatim
 
@@ -49,9 +49,9 @@ zero contention) — worse than the DDRAM path this pivot is replacing, not bett
   clearing moved to the fourth (last) capture cycle. Write completion (`ack` on the single-word
   write path) also moved to this same last cycle for a uniform, single `STATE_LAST` across both
   read and write — writes finish a few cycles "late" relative to what a dedicated single-access
-  write timing could achieve, but writes are the HPS download path only (not real-time-critical,
-  see `docs/phase1_sdram_map.md`), so the simplicity of one shared completion point outweighs
-  shaving a handful of cycles off a non-critical path.
+  write timing could achieve, but writes are the HPS download path only (not real-time-critical),
+  so the simplicity of one shared completion point outweighs shaving a handful of cycles off a
+  non-critical path.
 - `SDRAM_CLK` generation: upstream drives it via an `altddio_out` megafunction instance (a
   phase-shifted DDR output). **Removed** — replaced with a plain `assign SDRAM_CLK = clk;` — for
   the same reason `ddram_phy.sv` keeps `DDRAM_CLK` a top-level concern: this module should
@@ -110,7 +110,8 @@ differences, unrelated to the burst extension, fixed here:
 
 Burst-4 **write** support (not needed for Phase 1 — the only write consumer is the byte-at-a-time
 HPS download path) and burst lengths other than exactly 4 (not needed — every gfx ROM granule in
-this project is fixed at 64 bits / 4 words, see `docs/phase1_video_engine.md`'s tile row format).
+this project is fixed at 64 bits / 4 words, see `rtl/video/silkroad_tilemaps.sv`'s header for
+the tile row format).
 
 ## Verification
 

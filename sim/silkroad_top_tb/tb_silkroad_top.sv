@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 `timescale 1ns/1ps
 // Full-chain functional test for rtl/silkroad_top.sv: the SAME CPU program
 // tb_silkroad_core.sv used (sim/silkroad_core_tb/test_video.s), but loaded

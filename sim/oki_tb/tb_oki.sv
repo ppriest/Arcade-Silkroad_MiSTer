@@ -1,29 +1,31 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 `timescale 1ns/1ps
-// jt6295 playing one phrase from dreamwld's oki1 ROM: the shortest valid phrase in the
-// table, on channel 1 at full volume, with pin 7 low (ss = 0) and bank 0, as dreamwld.cpp
-// configures the chip (lines 398-414, 826). A smoke test of the vendored copy, not a check
-// against MAME's audio (Phase 4): pass when the status bit rises, samples reach the
-// output, and the status bit falls again within the phrase's length.
+// jt6295 playing one phrase from silkroad's OKI 1 ROM: the shortest valid phrase in the
+// table, on channel 1 at full volume, with pin 7 high (ss = 1) and bank 0, as
+// silkroad_sound.sv configures the chip. A smoke test of the vendored copy, not a check
+// against MAME's audio: pass when the status bit rises, samples reach the output, and the
+// status bit falls again within the phrase's length.
 //
 // RUN FROM THE REPOSITORY ROOT, after python sim/oki_tb/gen_fixture.py:
 //     scripts/run_sim.sh oki_tb [+PHRASE=n]
 module tb_oki;
-	localparam real HALF = 9.2593;          // 54 MHz clk_sys
+	localparam real HALF = 10.4167;         // 48 MHz clk_sys
 	logic clk = 0;
 	always #(HALF) clk = ~clk;
 	logic rst = 1;
 
-	// 1 MHz chip clock enable: 1 in 54
+	// 1 MHz chip clock enable: 1 in 48
 	logic [5:0] div = 0;
 	wire cen = (div == 6'd0);
-	always_ff @(posedge clk) div <= (div == 6'd53) ? 6'd0 : div + 6'd1;
+	always_ff @(posedge clk) div <= (div == 6'd47) ? 6'd0 : div + 6'd1;
 
 	logic [7:0] rom [0:524287];
 	initial $readmemh("sim/oki_tb/oki.hex", rom);
 
 	logic [17:0] rom_addr;
 	logic [7:0]  rom_q;
-	// bank 0: the chip's 0x30000-0x3FFFF window is ROM 0x30000-0x3FFFF
+	// bank 0: the chip's 0x20000-0x3FFFF window is ROM 0x20000-0x3FFFF
 	always_ff @(posedge clk) rom_q <= rom[{1'b0, rom_addr}];
 
 	logic        wrn = 1;
@@ -32,7 +34,7 @@ module tb_oki;
 	logic        sample;
 
 	jt6295 #(.INTERPOL(0)) u_oki (
-		.rst(rst), .clk(clk), .cen(cen), .ss(1'b0),
+		.rst(rst), .clk(clk), .cen(cen), .ss(1'b1),
 		.wrn(wrn), .din(din), .dout(dout),
 		.rom_addr(rom_addr), .rom_data(rom_q), .rom_ok(1'b1),
 		.sound(sound), .sample(sample)

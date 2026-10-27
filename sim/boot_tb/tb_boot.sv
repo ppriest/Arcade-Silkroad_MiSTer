@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 `timescale 1ns/1ps
 // silkroad's boot on maincpu, against MAME's bus trace (scripts/compare_boot_trace.py).
 //

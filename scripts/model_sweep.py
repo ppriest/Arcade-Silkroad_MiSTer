@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Capture scenes from every set and check scripts/render_model.py against each.
 
     python scripts/model_sweep.py                       # all sets, the default scene list
-    python scripts/model_sweep.py dreamwld --jobs 4
+    python scripts/model_sweep.py silkroad --jobs 4
     python scripts/model_sweep.py --report-only         # re-run the model on existing captures
 
 A scene is (frame, coin): coin 0 is attract, otherwise a coin at that frame and play

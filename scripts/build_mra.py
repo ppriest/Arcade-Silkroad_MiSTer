@@ -41,9 +41,9 @@ ROMDIRS = [Path(p) for p in (setting("MAME_ROMPATH") or "F:/Emulation/roms/MAME 
 # set: parent or None
 SETS = {"silkroad": None, "silkroada": "silkroad"}
 # per game (parent): button names, button 1 first. No manual, flyer or database found names them;
-# named for what each does pressed alone in play in MAME 0.289 (docs/screenshots/buttons_mame.png,
-# frames 3050-3070 after a coin and Start, one row a button): 1 swings the sword, 2 jumps, 3 changes
-# the magic icon beside the health bar.
+# named for what each does pressed alone in play in MAME 0.289 (frames 3050-3070 after a coin and
+# Start, one row a button): 1 swings the sword, 2 jumps, 3 changes the magic icon beside the
+# health bar.
 BUTTONS = {"silkroad": ["Attack", "Jump", "Select Magic"]}
 CATEGORY = {"silkroad": "Fighter"}
 ROTATION = {0: "horizontal", 90: "vertical (cw)", 270: "vertical (ccw)"}

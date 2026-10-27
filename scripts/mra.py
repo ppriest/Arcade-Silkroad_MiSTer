@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Build the SDRAM image an `.mra` describes, the way mra-tools-c would.
 
 Several zips per .mra: zip="a.zip|b.zip" (a set plus a BIOS zip).
 
 Used by scripts/build_mra.py to CHECK its own output: the image an `.mra`
 produces must be byte-identical to the one built directly from each driver's
-ROM_START by scripts/build_maincpu_hex.py and scripts/prep_tilemap_tb.py --
-which are independently verified against MAME's disassembly and against
-rendered frames.
+ROM_START by scripts/extract_romstart.py.
 
 That check is the whole point. LESSONS_LEARNED is blunt about this: every
 interleave on the Psikyo core that was DERIVED by reasoning about byte order

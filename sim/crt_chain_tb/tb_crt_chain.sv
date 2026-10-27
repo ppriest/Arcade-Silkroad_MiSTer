@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 `timescale 1ns/1ps
 // Self-checking test of rtl/video/crt_chain.sv on the video_timing raster,
 // sampled the way arcade_video samples it.

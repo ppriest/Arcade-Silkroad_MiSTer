@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 // From Arcade-Fuuki_MiSTer sim/oki_bridge_tb (rtl/sound/PROVENANCE.md), retimed for 54 MHz.
 // The OKI ROM bridge against the real sample_cache, at every fetch latency
 // that can meet the chip's slot boundary. RUN FROM THE REPOSITORY ROOT

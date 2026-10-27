@@ -1,3 +1,5 @@
+-- SPDX-License-Identifier: GPL-3.0-or-later
+--
 -------------------------------------------------------------------------------
 -- Phase 0 spike testbench, v3: boot TG68K.C in 68020 mode out of reset and
 -- run a program exercising actual 68020-only additions over base 68000:

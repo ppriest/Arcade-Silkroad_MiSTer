@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 // Unit test for sdram_narrow_bridge: real sdram_phy + sdram + chip model
 // underneath (same "real transport, not a stub" posture as every other
 // sdram_*_tb in this project), checking the word/byte extraction logic the

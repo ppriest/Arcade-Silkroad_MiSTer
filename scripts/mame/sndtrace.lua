@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-3.0-or-later
 -- Every write to the sound chips, with the machine time, for scripts/snd_trace.py. silkroad.cpp
 -- (324-327): OKI 1 at 0xC00025, the YM2151 at 0xC00029 (address) and 0xC0002D (data), OKI 2 at
 -- 0xC00031, OKI 1's bank at 0xC00034 -- byte handlers on the 68020's 32-bit bus. One line per

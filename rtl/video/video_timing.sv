@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 // Raw video timing. H total 512 and V total 262 at 8 MHz, chosen in docs/HACKS.md
 // (15.625 kHz, 59.637 Hz against MAME's 60 Hz). 380 x 224 visible, silkroad.cpp's visible
 // area (454).

@@ -1,28 +1,19 @@
-// Single-port wrapper around MiSTer's real DDRAM_* interface (see
-// docs/phase1_ddram_map.md -- protocol verified against a working reference,
-// MiSTer-devel/TSConf_MiSTer's ddram.sv, not derived from memory alone).
+// SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Presents a req/valid client interface, matching this project's standing
-// convention for latency-agnostic external memory ports (same shape as
-// tilemap_line_engine/sprite_render_engine's gfxrom/spritelut ports): a
-// single in-flight transaction at a time (the ddram_arbiter sitting on top
-// of this is responsible for serializing multiple logical consumers onto
-// it -- this module itself has no arbitration logic).
+// Single-port wrapper around MiSTer's DDRAM_* interface (protocol verified
+// against MiSTer-devel/TSConf_MiSTer's ddram.sv, not derived from memory
+// alone). rom_loader.sv reads the ROM the HPS DMA'd into DDR3 through it.
 //
-// Two transaction shapes, matching this project's real usage:
+// Presents a req/valid client interface: one in-flight transaction at a
+// time; this module itself has no arbitration logic.
+//
+// Two transaction shapes:
 //   - READ:  8-byte-aligned granule in, full 64-bit DDRAM_DOUT out (`addr`'s
-//            low 3 bits are ignored -- callers requesting gfx/program ROM
-//            content already address in aligned granules).
+//            low 3 bits are ignored -- the ROM copy reads aligned granules).
 //   - WRITE: single BYTE in (`wdata`), `addr` selects which of the 8 lanes
-//            via DDRAM_BE -- matches the real use case (the HPS
-//            ioctl_download ROM-loading path streams in byte/word at a
-//            time, not aligned 8-byte chunks).
+//            via DDRAM_BE.
 //
-// v1 limitation, deliberate: DDRAM_BURSTCNT is always 1 (no multi-beat
-// bursting) -- correctness first, matching this project's practice
-// throughout; a throughput pass (wider bursts to amortize DDR3 latency
-// across a shared port) is future work once real access patterns are
-// known (see docs/phase1_ddram_map.md's "Known open item").
+// DDRAM_BURSTCNT is always 1 (no multi-beat bursting).
 
 module ddram_phy (
 	input  logic clk,

@@ -81,9 +81,9 @@ extending it further:
    address, which was enough to confirm the core's absolute-long EA computation was fine and
    the bug was ours.
 3. **Stopped hand-encoding 68k machine code entirely after two near-misses above.** Built vasm
-   (m68k, Motorola syntax) from official source instead — see `tools/README.md` and
-   `scripts/fetch_build_vasm.sh` for why it isn't vendored (license) and how to reproduce the
-   build. `sim/tg68k_spike/gen_rom_vhdl.py` converts a `vasm -Fbin` output directly into VHDL
+   (m68k, Motorola syntax) from official source instead — see DreamWorld's
+   `tools/README.md` and `scripts/fetch_build_vasm.sh` for why it isn't vendored (license) and how
+   to reproduce the build. `sim/tg68k_spike/gen_rom_vhdl.py` converts a `vasm -Fbin` output directly into VHDL
    `mem_v` initialization lines, so there's no manual transcription step left anywhere in this
    testbench's ROM contents. Cross-checking vasm's own output for `move.l d0,$2000.l`
    (`0x23C0`) against the `0x2380` used in false alarm #2 is what actually found that mistake.
@@ -123,11 +123,10 @@ Confirmed load-bearing, not just plausible: reverting either file's initializers
 crash; with both applied, every isolation test (pure VHDL and mixed SV/VHDL) runs the same
 40,000-cycle workload cleanly in ~1-2 seconds, matching the Phase 0 spike's own baseline.
 
-Once past the crash, `sim/maincpu_tb/tb_maincpu.sv`'s Case 1 (real ROM req/valid fetch, all 6
+Once past the crash, DreamWorld's `sim/maincpu_tb/tb_maincpu.sv` Case 1 (real ROM req/valid fetch, all 6
 BRAM regions -- sprite RAM/palette/tilemap VRAM x2/video regs/work RAM -- the 32-bit input-port
 read, and the sound-latch write) passed cleanly on the first real run: the address decode and
-DTACK generation logic itself (`rtl/cpu/maincpu.sv`, built the same way
-`rtl/sound/sound_cpu_sngkace.sv`'s req/valid conversion was) is verified correct.
+DTACK generation logic itself (`rtl/cpu/maincpu.sv`) is verified correct.
 
 **RESOLVED (2026-08-23): Case 2 now passes, and TG68K.C's interrupt handling was never at
 fault.** This entry previously recorded the level-4 autovector vblank IRQ as an open CPU
@@ -136,8 +135,8 @@ not `0x70`". That reading was wrong. A bus trace shows the CPU fetching from `0x
 `0x00000072` exactly as it should -- `0x00000000` was the *data* it read back from that address,
 not the address it read from, and it then correctly jumped to the (zero) pointer it found.
 
-The vector table had been zeroed by the testbench itself. `sim/maincpu_tb/tb_maincpu.sv` wrote
-the vector-28 entry (`rom[0x38]`/`rom[0x39]`) BEFORE its `$readmemh` of the assembled program.
+The vector table had been zeroed by the testbench itself. That bench wrote the vector-28
+entry (`rom[0x38]`/`rom[0x39]`) BEFORE its `$readmemh` of the assembled program.
 That image is contiguous from byte `0x8` past the ISR at `org $100`, so it spans byte `0x70` and
 filled the `0x70`-`0xFF` gap with zeroes, silently overwriting the entry. Reordering the two
 statements makes Case 2 pass with no RTL change whatsoever.

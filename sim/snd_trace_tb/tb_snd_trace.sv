@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 `timescale 1ns/1ps
 // A window of MAME's sound-chip writes replayed through silkroad_sound and the real SDRAM path
 // (the OKIs' sample ROMs from the .mra image), the stereo mix recorded at 48 kHz for

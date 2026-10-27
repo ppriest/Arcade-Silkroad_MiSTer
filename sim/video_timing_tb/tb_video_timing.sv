@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 `timescale 1ns/1ps
 // video_timing over two whole frames, every pixel: 512 x 262; the engines' window h_active at
 // hcnt 0-379 and the output's (hblank low) at 1-380; hsync 420-457; vblank from line 224,

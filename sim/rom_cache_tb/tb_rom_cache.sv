@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 `timescale 1ns/1ps
 // rom_cache against a granule server with a varying latency and a ROM model: 200,000 word reads
 // in the 68020's pattern (runs of sequential words with jumps, revisits of a small working set,

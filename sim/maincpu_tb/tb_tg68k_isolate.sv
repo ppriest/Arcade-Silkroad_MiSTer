@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 // Sharpest possible isolation test: instantiate TG68K directly (bypassing
 // maincpu.sv entirely), using the exact same RESET/HALT (tri1 open-
 // collector) and VPA (IACK-only) fixes maincpu.sv now has, but with the

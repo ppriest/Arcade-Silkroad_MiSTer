@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-3.0-or-later
 -- Dump the drawn half of sprite RAM every frame, for scripts/sprite_load.py.
 --
 --   CORE_CPU, CORE_SPACE  the CPU and address space (regions.json)

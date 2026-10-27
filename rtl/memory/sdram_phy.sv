@@ -1,22 +1,21 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 // Single-port wrapper around one of rtl/memory/sdram/sdram.sv's three
 // physical ports, translating its toggle-based req/ack handshake into this
 // project's standard req(pulse-while-!busy)/valid(pulse)/busy client
-// interface -- same shape as ddram_phy.sv, so sdram_arbiter (built the same
-// way as ddram_arbiter.sv) can sit on top without its own consumers needing
-// to know or care which physical transport is underneath.
+// interface, so the arbiter and the video engines sit on top without knowing
+// which physical transport is underneath.
 //
 // Address is a 25-bit BYTE offset into the SDRAM chip's real 32MB capacity
-// (MT48LC16M16, see docs/phase1_sdram_map.md) -- narrower than ddram_phy's
-// 28-bit DDRAM-window address on purpose, matching the smaller real chip
-// rather than padding to the old DDRAM window's width.
+// (MT48LC16M16).
 //
 // Two transaction shapes, matching sdram.sv's own port contract:
-//   - READ:  8-byte-aligned granule in (`addr`'s low 3 bits should be 0 --
-//            see docs/phase1_sdram_map.md), full 64-bit `port_dout` out,
-//            assembled by sdram.sv's own burst-4 read logic.
+//   - READ:  8-byte-aligned granule in (`addr`'s low 3 bits should be 0),
+//            full 64-bit `port_dout` out, assembled by sdram.sv's own
+//            burst-4 read logic.
 //   - WRITE: single BYTE in (`wdata`), `addr[0]` selects the low or high
-//            byte lane of the 16-bit word at `addr[24:1]` -- matches the
-//            HPS ioctl_download path's byte-at-a-time writes.
+//            byte lane of the 16-bit word at `addr[24:1]`; `we16` writes
+//            both lanes at once.
 
 module sdram_phy (
 	input  logic clk,
@@ -36,9 +35,8 @@ module sdram_phy (
 	input  logic         we,       // 0 = 8-byte-granule burst read, 1 = write
 	// 1 = write BOTH byte lanes from wdata[15:0] (addr must be even); 0 =
 	// write the single byte wdata[7:0] into the lane addr[0] selects. The
-	// wide form exists for the ROM download, which gets a whole 16-bit word
-	// per transfer in hps_io WIDE mode and would otherwise burn two full
-	// SDRAM transactions on it.
+	// wide form halves the download's transactions: sdram_download pairs
+	// consecutive bytes, rom_loader writes four words per 8-byte granule.
 	input  logic         we16,
 	input  logic [24:0] addr,     // byte offset into the 32MB SDRAM chip
 	input  logic [15:0] wdata,    // data to write (we=1 only); see we16

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 `timescale 1ns/1ps
 // Elaboration/wiring smoke test for rtl/silkroad_core.sv -- NOT a functional
 // test (see tb_silkroad_core.sv for that). This just ties off every external
@@ -10,7 +12,7 @@ module tb_silkroad_core_smoke;
 	logic clk = 0;
 	always #5 clk = ~clk;
 	logic reset;
-	logic ce_pix = 1'b1; // matches this project's existing video testbenches -- see docs/phase1_sdram_map.md's ce_pix note
+	logic ce_pix = 1'b1; // matches this project's existing video testbenches
 
 	logic         cpu_rom_req;
 	logic [18:0] cpu_rom_addr;

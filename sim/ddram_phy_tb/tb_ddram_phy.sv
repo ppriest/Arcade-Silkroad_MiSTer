@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 // Verifies ddram_phy's req/valid client interface against the DDRAM_*
 // protocol timing (busy/dout_ready handshake) as modeled by ddram_model,
 // run against TWO independently-parameterized model latencies (see

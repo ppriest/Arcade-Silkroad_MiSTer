@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 // rtl/silkroad_core.sv (CPU + video) wired to rtl/memory/silkroad_sdram_top.sv
 // (the ROM store). The ROM port shapes of the two modules match, so this is
 // a port-to-port connection plus the two reset domains below.
@@ -61,7 +63,7 @@ module silkroad_top #(
 	output logic         vsync,
 	output logic [14:0] rgb,
 
-	// Sound: both OKIs mixed to mono, signed 16-bit
+	// Sound: YM2151 stereo, each OKI to both sides, signed 16-bit
 	output logic [15:0] audio_l,
 	output logic [15:0] audio_r,
 
